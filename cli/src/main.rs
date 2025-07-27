@@ -3,23 +3,14 @@ use std::path::Path;
 
 use chrono::NaiveDate;
 use clap::Parser;
-use image::ImageReader;
-use reqwest::blocking::Client;
-use reqwest::blocking::multipart;
-use serde::Serialize;
+use reqwest::blocking::{Client, multipart};
 
-const IMAGE_DIR: &str = ".images";
 const API_URL: &str = "http://0.0.0.0:3000";
 
 #[derive(Parser, Debug)]
 struct Cli {
     image_path: String,
     date: String,
-}
-
-#[derive(Serialize)]
-struct ImageRequest {
-    image: String,
 }
 
 fn is_valid_image(image_path: &str) -> bool {
