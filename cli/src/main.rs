@@ -1,9 +1,13 @@
-use std::error::Error;
+use std::io::Read;
 use std::path::Path;
+use std::{error::Error, fs::File};
 
+use base64::Engine;
+use base64::engine::general_purpose;
 use chrono::NaiveDate;
 use clap::Parser;
-use reqwest::blocking::{Client, multipart};
+use reqwest::blocking::Client;
+use serde::Serialize;
 
 const API_URL: &str = "http://0.0.0.0:3000";
 
@@ -11,6 +15,12 @@ const API_URL: &str = "http://0.0.0.0:3000";
 struct Cli {
     image_path: String,
     date: String,
+}
+
+#[derive(Serialize)]
+struct ImageRequest {
+    date: String,
+    image: String,
 }
 
 fn is_valid_image(image_path: &str) -> bool {
@@ -34,13 +44,18 @@ fn is_valid_date(date: &str) -> bool {
 }
 
 fn post_image(image_path: String, date: String) -> Result<(), Box<dyn Error>> {
+    let mut image = File::open(&image_path)?;
+    let mut buffer = Vec::new();
+    image.read_to_end(&mut buffer)?;
+
+    let base64_image = general_purpose::STANDARD.encode(&buffer);
+    let image_request = ImageRequest {
+        date: date.clone(),
+        image: base64_image,
+    };
+
     let client = Client::new();
-
-    let form = multipart::Form::new()
-        .text("date", date)
-        .file("image", image_path)?;
-
-    client.post(API_URL).multipart(form).send()?;
+    client.post(API_URL).json(&image_request).send()?;
 
     Ok(())
 }
