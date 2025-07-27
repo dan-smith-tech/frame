@@ -5,6 +5,7 @@ use chrono::NaiveDate;
 use clap::Parser;
 use image::ImageReader;
 use reqwest::blocking::Client;
+use reqwest::blocking::multipart;
 use serde::Serialize;
 
 const IMAGE_DIR: &str = ".images";
@@ -41,17 +42,14 @@ fn is_valid_date(date: &str) -> bool {
     NaiveDate::parse_from_str(date, "%Y-%m-%d").is_ok()
 }
 
-fn post_image() -> Result<(), Box<dyn Error>> {
+fn post_image(image_path: String, date: String) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
 
-    let payload = ImageRequest {
-        image: "this is an image".to_string(),
-    };
+    let form = multipart::Form::new()
+        .text("date", date)
+        .file("image", image_path)?;
 
-    let response = client.post(API_URL).json(&payload).send()?;
-
-    println!("Response: {:?}", response.status());
-    println!("Response body: {:?}", response.text()?);
+    client.post(API_URL).multipart(form).send()?;
 
     Ok(())
 }
@@ -71,5 +69,5 @@ fn main() -> Result<(), Box<dyn Error>> {
         std::process::exit(1);
     }
 
-    post_image()
+    post_image(image_path, date)
 }
