@@ -1,5 +1,4 @@
 use axum::{Json, Router, routing::get};
-use base64::{Engine, engine::general_purpose};
 use serde::{Deserialize, Serialize};
 
 const DB_PATH: &str = ".images";
@@ -42,7 +41,15 @@ async fn get_image() -> Json<ImageResponse> {
             if let Some(chosen_key) = chosen_key {
                 let image_data = db.get(chosen_key.as_bytes());
                 let base64_image = match image_data {
-                    Ok(Some(data)) => general_purpose::STANDARD.encode(data),
+                    Ok(Some(data)) => match String::from_utf8(data.to_vec()) {
+                        Ok(image_str) => image_str,
+                        Err(e) => {
+                            eprintln!("Error decoding image data: {}", e);
+                            return Json(ImageResponse {
+                                image: String::new(),
+                            });
+                        }
+                    },
                     Ok(None) => {
                         eprintln!("No image found for date: {}", chosen_key);
                         return Json(ImageResponse {

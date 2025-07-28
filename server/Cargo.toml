@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 axum = "0.8.4"
-base64 = "0.22.1"
 chrono = "0.4.41"
 serde = { version = "1.0.219", features = ["derive"] }
 sled = "0.34.7"
