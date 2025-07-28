@@ -12,10 +12,9 @@ def main():
     response.raise_for_status()
 
     base64_image = response.json().get("image")
-    print(base64_image)
     image_bytes = BytesIO(base64.b64decode(base64_image))
     image = Image.open(image_bytes)
-    image.save("output_image.png")
+    image.show()
 
 
 if __name__ == "__main__":
