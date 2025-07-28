@@ -1,0 +1,22 @@
+import base64
+from io import BytesIO
+
+import requests
+from PIL import Image
+
+API_URL = "http://0.0.0.0:3000"
+
+
+def main():
+    response = requests.get(API_URL)
+    response.raise_for_status()
+
+    base64_image = response.json().get("image")
+    print(base64_image)
+    image_bytes = BytesIO(base64.b64decode(base64_image))
+    image = Image.open(image_bytes)
+    image.save("output_image.png")
+
+
+if __name__ == "__main__":
+    main()
