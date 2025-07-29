@@ -62,19 +62,28 @@ async fn get_image() -> Result<Json<ImageResponse>, (StatusCode, Json<serde_json
     }
 }
 
-async fn post_image(Json(payload): Json<ImageRequest>) {
-    let image = payload.image.clone();
-    let date = payload.date.clone();
+fn post_image_inner(payload: &ImageRequest) -> Result<ImageResponse, String> {
+    let db = sled::open(DB_PATH).map_err(|e| e.to_string())?;
 
-    let db = sled::open(DB_PATH);
-    match db {
-        Ok(db) => {
-            if let Err(e) = db.insert(date.clone().into_bytes(), image.clone().into_bytes()) {
-                eprintln!("Error inserting data: {}", e);
-            }
-        }
+    db.insert(
+        payload.date.clone().into_bytes(),
+        payload.image.clone().into_bytes(),
+    )
+    .map_err(|e| e.to_string())?;
+
+    Ok(ImageResponse {
+        image: payload.image.clone(),
+    })
+}
+
+async fn post_image(
+    Json(payload): Json<ImageRequest>,
+) -> Result<Json<ImageResponse>, (StatusCode, Json<serde_json::Value>)> {
+    match post_image_inner(&payload) {
+        Ok(response) => Ok(Json(response)),
         Err(e) => {
-            eprintln!("Error opening database: {}", e);
+            let error_response = json!({ "error": e });
+            Err((StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)))
         }
     }
 }
