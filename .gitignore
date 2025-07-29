@@ -1,5 +1,12 @@
-# Project
+## Project
+
 server/.images
+
+## Rust
+
+/target
+
+## Python
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
