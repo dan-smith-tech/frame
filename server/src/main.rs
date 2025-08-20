@@ -92,6 +92,6 @@ async fn post_image(
 async fn main() {
     let app = Router::new().route("/", get(get_image).post(post_image));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
