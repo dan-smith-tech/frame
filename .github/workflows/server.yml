@@ -27,4 +27,4 @@ jobs:
         with:
           context: ./server
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/frmae-server:latest
+          tags: ghcr.io/${{ github.repository_owner }}/frame-server:latest
