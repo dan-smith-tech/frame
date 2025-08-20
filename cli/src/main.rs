@@ -9,7 +9,7 @@ use clap::Parser;
 use reqwest::blocking::Client;
 use serde::Serialize;
 
-const API_URL: &str = "http://0.0.0.0:3000";
+const API_URL: &str = "http://0.0.0.0:3001";
 
 #[derive(Parser, Debug)]
 struct Cli {
@@ -55,7 +55,8 @@ fn post_image(image_path: String, date: String) -> Result<(), Box<dyn Error>> {
     };
 
     let client = Client::new();
-    client.post(API_URL).json(&image_request).send()?;
+    let response = client.post(API_URL).json(&image_request).send()?;
+    println!("Response status: {}", response.status());
 
     Ok(())
 }

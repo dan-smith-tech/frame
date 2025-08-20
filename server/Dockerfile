@@ -21,7 +21,7 @@ COPY . .
 RUN cargo build --release
 
 # Stage 2: Create minimal runtime image with the built binary
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 # Install runtime dependencies for Rust binaries
 RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
