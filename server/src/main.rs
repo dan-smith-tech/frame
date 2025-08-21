@@ -63,8 +63,7 @@ async fn get_image(
 
     let provided_key = headers
         .get("x-private-key")
-        .and_then(|val| val.to_str().ok())
-        .unwrap_or("");
+        .map_or("None", |v| v.to_str().unwrap_or("Invalid UTF-8"));
 
     if private_key.is_empty() || provided_key != private_key {
         let error_response = json!({ "error": "Unauthorized: Invalid or missing private key" });
