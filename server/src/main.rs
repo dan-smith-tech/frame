@@ -1,6 +1,11 @@
-use axum::{Json, Router, http::StatusCode, routing::get};
+use axum::{
+    Json, Router,
+    http::{HeaderMap, StatusCode},
+    routing::get,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::env;
 
 const DB_PATH: &str = ".images";
 
@@ -31,7 +36,6 @@ fn get_image_inner() -> Result<ImageResponse, String> {
     let chosen_key = keys
         .iter()
         .reduce(|previous_date, key| {
-            // return previous data if the new date is NOT in the future
             if let Ok(date) = chrono::NaiveDate::parse_from_str(key, "%Y-%m-%d") {
                 if date > chrono::Local::now().naive_local().date() {
                     return previous_date;
@@ -52,7 +56,21 @@ fn get_image_inner() -> Result<ImageResponse, String> {
     })
 }
 
-async fn get_image() -> Result<Json<ImageResponse>, (StatusCode, Json<serde_json::Value>)> {
+async fn get_image(
+    headers: HeaderMap,
+) -> Result<Json<ImageResponse>, (StatusCode, Json<serde_json::Value>)> {
+    let private_key = env::var("PRIVATE_KEY").unwrap_or_default();
+
+    let provided_key = headers
+        .get("x-private-key")
+        .and_then(|val| val.to_str().ok())
+        .unwrap_or("");
+
+    if private_key.is_empty() || provided_key != private_key {
+        let error_response = json!({ "error": "Unauthorized: Invalid or missing private key" });
+        return Err((StatusCode::UNAUTHORIZED, Json(error_response)));
+    }
+
     match get_image_inner() {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
@@ -90,6 +108,8 @@ async fn post_image(
 
 #[tokio::main]
 async fn main() {
+    dotenv::dotenv().ok();
+
     let app = Router::new().route("/", get(get_image).post(post_image));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();

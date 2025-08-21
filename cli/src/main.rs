@@ -9,7 +9,7 @@ use clap::Parser;
 use reqwest::blocking::Client;
 use serde::Serialize;
 
-const API_URL: &str = "http://0.0.0.0:3001";
+const API_URL: &str = "http://78.46.243.24:3001";
 
 #[derive(Parser, Debug)]
 struct Cli {
