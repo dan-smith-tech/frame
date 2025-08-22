@@ -5,3 +5,9 @@
    ```bash
    ssh pi@<raspberry_pi_ip>
    ```
+
+3. Crontab:
+
+   ```bash
+   0 2 * * * /home/dan/.virtualenvs/pimoroni/bin/python /home/dan/frame/agent/main.py
+   ```
